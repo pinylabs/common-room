@@ -1,0 +1,112 @@
+---
+// A member's page: their profile and their posts. When the visitor is signed in as this member, it adds the write box,
+// and the posts they pinned in this session show above the rest as drafts only they can see.
+import { actions, isInputError } from "astro:actions";
+import { getEntry, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { ago, photoUrl, postMeta, posts, signedIn } from "../../lib/club";
+
+const { slug } = Astro.params;
+const member = slug ? await getEntry("members", slug) : undefined;
+if (!member) return Astro.rewrite("/404");
+
+const me = await signedIn(Astro.session);
+const own = me?.id === member.id;
+
+// "Pin it" posted here: on success, show the page again as a fresh GET, so a reload does not pin the post twice.
+const result = Astro.getActionResult(actions.pin);
+if (result && !result.error) return Astro.redirect(`/members/${member.id}#posts`, 303);
+const fieldErrors: Record<string, string[] | undefined> = result?.error && isInputError(result.error) ? result.error.fields : {};
+const formError = result?.error && !isInputError(result.error) ? result.error.message : undefined;
+if (result?.error) Astro.response.status = result.error.status;
+
+// The write box starts with the member's suggestion, or with what the visitor wrote when a field was refused.
+let values = member.data.suggestion ?? { title: "", body: "" };
+if (result?.error && Astro.request.method === "POST") {
+	try {
+		const form = await Astro.request.formData();
+		values = { title: String(form.get("title") ?? ""), body: String(form.get("body") ?? "") };
+	} catch {
+		// The form could not be read again; the suggestion stays.
+	}
+}
+
+const drafts = own ? ((await Astro.session?.get("drafts")) ?? []) : [];
+const theirPosts = await posts((post) => post.data.author.id === member.id);
+const bodies = await Promise.all(theirPosts.map(async (post) => (await render(post)).Content));
+const { Content: Bio } = await render(member);
+const { name } = member.data;
+---
+
+<Base title={name} desk description={`${name}, a sample member of Common Room.`}>
+	<main class="wrap-desk grid grid-cols-profile items-start gap-10 pt-7.5 pb-20 max-md:grid-cols-1">
+		<aside class="sticky top-5 rounded-profile border border-neutral-200 bg-neutral-50 p-7 text-center max-md:static dark:border-neutral-800 dark:bg-neutral-900">
+			<img class="mx-auto size-37.5 rounded-pill border-4 border-primary-600 object-cover dark:border-primary-400" src={photoUrl(member.data.photo.id, 400)} width="150" height="150" alt={member.data.photo.alt} style={`view-transition-name: member-${member.id}`} />
+			<h1 class="mt-4 text-title-md">{name}</h1>
+			<div class="mt-2 leading-body text-neutral-600 dark:text-neutral-400"><Bio /></div>
+			<div class="mt-4 flex flex-wrap justify-center gap-1.5">
+				{member.data.tags.map((tag) => <span class="rounded-pill border border-primary-600 px-2.5 py-1 text-caption text-primary-600 dark:border-primary-400 dark:text-primary-400">{tag}</span>)}
+			</div>
+			<dl class="mt-5 grid grid-cols-facts gap-x-3.5 gap-y-2 border-t border-neutral-200 pt-4 text-left text-label dark:border-neutral-800">
+				<dt class="text-neutral-600 dark:text-neutral-400">Member since</dt><dd>{member.data.since}</dd>
+				<dt class="text-neutral-600 dark:text-neutral-400">Posts</dt><dd>{member.data.postCount}</dd>
+				<dt class="text-neutral-600 dark:text-neutral-400">Usually in</dt><dd>{member.data.usuallyIn}</dd>
+			</dl>
+		</aside>
+
+		<div>
+			<h2 id="write" class="mb-4 text-title">Write on the board</h2>
+			{
+				own ? (
+					<form class="reveal mb-7.5 rounded-field bg-tertiary-100 p-5 text-tertiary-950 shadow-write" method="POST" action={actions.pin}>
+						{formError && <p class="field-error mt-0 mb-3" role="alert">{formError}</p>}
+						<label class="field-label" for="title">Title</label>
+						<input class="field font-serif text-field" id="title" name="title" value={values.title} required minlength="3" maxlength="90" aria-invalid={fieldErrors.title ? "true" : undefined} aria-describedby={fieldErrors.title ? "title-error" : undefined} />
+						{fieldErrors.title && <p class="field-error" id="title-error">{fieldErrors.title[0]}</p>}
+						<label class="field-label mt-3" for="body">Your post</label>
+						<textarea class="field" id="body" name="body" rows="3" required minlength="3" maxlength="600" aria-invalid={fieldErrors.body ? "true" : undefined} aria-describedby={fieldErrors.body ? "body-error" : undefined}>{values.body}</textarea>
+						{fieldErrors.body && <p class="field-error" id="body-error">{fieldErrors.body[0]}</p>}
+						<div class="mt-3 flex items-center justify-between gap-3">
+							<small class="text-caption text-neutral-600">Your post stays in your session as a draft; only you see it in this preview.</small>
+							<button type="submit" class="btn-oxblood button">Pin it</button>
+						</div>
+					</form>
+				) : (
+					<div class="mb-7.5 flex flex-wrap items-center justify-between gap-3 rounded-field bg-tertiary-100 p-5 text-tertiary-950 shadow-write">
+						<p class="text-button">
+							{me ? `You're signed in as ${me.data.name}. ` : ""}Sign in as {name}, a sample member with no password, to write on the board.
+						</p>
+						<form method="POST" action="/sign-in">
+							<input type="hidden" name="member" value={member.id} />
+							<button type="submit" class="btn-oxblood button">Sign in as {name}</button>
+						</form>
+					</div>
+				)
+			}
+
+			<h2 id="posts" class="mb-4 text-title">{name}'s posts</h2>
+			{
+				drafts.map((draft) => (
+					<article class="post post-draft reveal">
+						<span class="flag">Your draft · only you can see this</span>
+						<h3 class="my-1.5 text-title-sm">{draft.title}</h3>
+						<p class="leading-body text-neutral-600 dark:text-neutral-400">{draft.body}</p>
+						<div class="mt-2.5 text-caption text-neutral-600 dark:text-neutral-400">{ago(draft.createdAt)} · a draft of this demo, kept in your session</div>
+					</article>
+				))
+			}
+			{
+				theirPosts.map((post, i) => {
+					const Body = bodies[i]!;
+					return (
+						<article class="post reveal">
+							<h3 class="my-1.5 text-title-sm">{post.data.title}</h3>
+							<div class="leading-body text-neutral-600 dark:text-neutral-400"><Body /></div>
+							<div class="mt-2.5 text-caption text-neutral-600 dark:text-neutral-400">{postMeta(post).join(" · ")}</div>
+						</article>
+					);
+				})
+			}
+		</div>
+	</main>
+</Base>

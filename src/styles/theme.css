@@ -1,0 +1,165 @@
+/* Common Room's design tokens, the one file that sets the template's look. Every colour, face, size, radius, shadow
+   and measure the pages use is named here, and the markup reaches them only through Tailwind's utilities: change a
+   value here and every page follows. `static` keeps every token in the stylesheet, so a design panel can edit it live.
+
+   The club is dark-led: at night the room is near-black oxblood, by day the same room in parchment. Light pages use
+   the low steps for grounds and the high ones for ink; `dark:` swaps them on the same scales. */
+@theme static {
+  /* Tailwind's own palette, type scale and radii are replaced by Common Room's, so nothing off-brand can slip in. */
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --container-*: initial;
+
+  --color-white: #fff;
+  --color-black: #000;
+  --color-transparent: transparent;
+
+  /* Primary: brass, the club's accent. 600 is the light pages' brass, 400 the dark pages'. */
+  --color-primary: #c9a24a;
+  --color-primary-50: #fbf6e9;
+  --color-primary-100: #f5ead0;
+  --color-primary-200: #ebd59f;
+  --color-primary-300: #dfbc6f;
+  --color-primary-400: #c9a24a;
+  --color-primary-500: #b38b35;
+  --color-primary-600: #9b7424;
+  --color-primary-700: #7c5c1e;
+  --color-primary-800: #5e4619;
+  --color-primary-900: #433214;
+  --color-primary-950: #2a1f0c;
+
+  /* Secondary: oxblood, for the pins, the events, the signed-in bar and "Pin it". 800 by day, 700 at night. */
+  --color-secondary: #7a2430;
+  --color-secondary-50: #fbf1f2;
+  --color-secondary-100: #f5dfe1;
+  --color-secondary-200: #ebbfc4;
+  --color-secondary-300: #dc939b;
+  --color-secondary-400: #c6636e;
+  --color-secondary-500: #a8404c;
+  --color-secondary-600: #8f2f3b;
+  --color-secondary-700: #7a2430;
+  --color-secondary-800: #6a1d27;
+  --color-secondary-900: #4f161d;
+  --color-secondary-950: #2f0c11;
+
+  /* Tertiary: parchment and cork. 50 a field, 100 the paper of a post, 200 the words at night, 300 an event's small
+     words, 400 the board by day, 900 the board at night, 950 the ink on paper and the words by day. */
+  --color-tertiary: #c9a77c;
+  --color-tertiary-50: #fffaf0;
+  --color-tertiary-100: #f4ead6;
+  --color-tertiary-200: #f1e6d0;
+  --color-tertiary-300: #e2c9a6;
+  --color-tertiary-400: #c9a77c;
+  --color-tertiary-500: #b08b5e;
+  --color-tertiary-600: #8f6f49;
+  --color-tertiary-700: #6d5438;
+  --color-tertiary-800: #4f3d29;
+  --color-tertiary-900: #3a2a1f;
+  --color-tertiary-950: #2b1a14;
+
+  /* Neutral: the room. By day: panel 50, ground 100, rule 200, a field's edge 300, soft words 600. At night: soft
+     words 400, rule 800, panel 900, ground 950. */
+  --color-neutral: #7b6553;
+  --color-neutral-50: #fbf5ea;
+  --color-neutral-100: #f3ead8;
+  --color-neutral-200: #e2d4bc;
+  --color-neutral-300: #d8c7a8;
+  --color-neutral-400: #c2ad8f;
+  --color-neutral-500: #9e8770;
+  --color-neutral-600: #7b6553;
+  --color-neutral-700: #574238;
+  --color-neutral-800: #3d272a;
+  --color-neutral-900: #2a181b;
+  --color-neutral-950: #1c1012;
+
+  /* Faces, loaded from Google Fonts by the layout. Young Serif has one weight; a bold heading is the browser's. */
+  --font-sans: 'Work Sans', system-ui, sans-serif;
+  --font-serif: 'Young Serif', Georgia, serif;
+
+  /* Type scale. Each size carries its usual line height; `leading-*` adjusts one use. */
+  --text-flag: 12px;
+  --text-flag--line-height: normal;
+  --text-tiny: 12.5px;
+  --text-tiny--line-height: normal;
+  --text-caption: 13px;
+  --text-caption--line-height: normal;
+  --text-label: 14px;
+  --text-label--line-height: normal;
+  --text-monogram: 15px;
+  --text-monogram--line-height: normal;
+  --text-button: 15px;
+  --text-button--line-height: normal;
+  --text-note: 15px;
+  --text-note--line-height: 1.5;
+  --text-body: 16px;
+  --text-body--line-height: normal;
+  --text-intro: 17px;
+  --text-intro--line-height: 1.6;
+  --text-lede: 19px;
+  --text-lede--line-height: 1.6;
+  --text-field: 20px;
+  --text-field--line-height: normal;
+  --text-title-xs: 22px;
+  --text-title-xs--line-height: 1.2;
+  --text-title-sm: 23px;
+  --text-title-sm--line-height: normal;
+  --text-mark: 26px;
+  --text-mark--line-height: normal;
+  --text-title: 30px;
+  --text-title--line-height: normal;
+  --text-title-md: 38px;
+  --text-title-md--line-height: normal;
+  --text-title-lg: 42px;
+  --text-title-lg--line-height: normal;
+  --text-display-sm: 44px;
+  --text-display-sm--line-height: 1.02;
+  --text-display: 74px;
+  --text-display--line-height: 1.02;
+
+  --leading-body: 1.55;
+  --leading-loose: 1.6;
+  --tracking-label: 0.06em;
+
+  /* Shapes: the pill of every button and tag, the hero's arch and its foot, the board, a profile, a member's card,
+     a post on a member's page, a field, a note pinned to cork and a photo on one. */
+  --radius-pill: 999px;
+  --radius-arch: 220px;
+  --radius-arch-sm: 140px;
+  --radius-profile: 20px;
+  --radius-board: 18px;
+  --radius-card: 16px;
+  --radius-post: 14px;
+  --radius-field: 6px;
+  --radius-note: 3px;
+  --radius-photo: 2px;
+
+  /* Shadows: the hero's frame, a note on the board, its pin, the write box; the cork's sunk edge. */
+  --shadow-frame: 0 30px 60px rgb(0 0 0 / 0.35);
+  --shadow-note: 0 10px 22px rgb(0 0 0 / 0.3);
+  --shadow-pin: 0 3px 4px rgb(0 0 0 / 0.35);
+  --shadow-write: 0 10px 22px rgb(0 0 0 / 0.25);
+  --inset-shadow-cork: inset 0 0 0 10px rgb(0 0 0 / 0.12);
+
+  /* Spacing follows Tailwind's 4px step. Measures: the home's column, a member's page, and the hero's words. */
+  --spacing: 0.25rem;
+  --container-room: 1260px;
+  --container-desk: 1160px;
+  --container-lede: 470px;
+
+  /* Grids: the hero's words beside its arch, the join band, a profile beside its posts, a profile's facts, and the
+     sign-in's choice of members. */
+  --grid-template-columns-hero: 1fr 1.1fr;
+  --grid-template-columns-join: 1.2fr 1fr;
+  --grid-template-columns-profile: 340px 1fr;
+  --grid-template-columns-facts: auto 1fr;
+  --grid-template-columns-members: repeat(auto-fill, minmax(220px, 1fr));
+
+  /* Motion: the glide every page shares, and the spring of a note settling on its pin. */
+  --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+  --ease-pin: cubic-bezier(0.3, 1.4, 0.5, 1);
+}

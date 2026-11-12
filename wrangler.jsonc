@@ -1,0 +1,14 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "common-room",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"compatibility_date": "2026-02-24",
+	"compatibility_flags": ["nodejs_compat"],
+	// The session store Astro's Cloudflare adapter asks for: the signed-in sample member and their drafts.
+	// `astro dev` keeps it in Wrangler's local state under .wrangler/.
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+		},
+	],
+}

@@ -1,0 +1,17 @@
+---
+// A member's card, linking to their page. The photo names itself after the member, so it grows into the profile.
+import type { CollectionEntry } from "astro:content";
+import { photoUrl } from "../lib/club";
+
+interface Props {
+	member: CollectionEntry<"members">;
+}
+
+const { member } = Astro.props;
+---
+
+<a class="lift-card reveal block rounded-card border border-neutral-200 bg-neutral-50 p-5.5 text-center dark:border-neutral-800 dark:bg-neutral-900" href={`/members/${member.id}`}>
+	<img class="mx-auto size-23 rounded-pill border-3 border-primary-600 object-cover dark:border-primary-400" loading="lazy" src={photoUrl(member.data.photo.id, 300)} width="92" height="92" alt={member.data.photo.alt} style={`view-transition-name: member-${member.id}`} />
+	<b class="mt-3 block font-serif text-title-xs leading-normal font-normal">{member.data.name}</b>
+	<span class="text-label text-neutral-600 dark:text-neutral-400">{member.data.line}</span>
+</a>

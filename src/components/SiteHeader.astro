@@ -1,0 +1,38 @@
+---
+// The header: the club's mark, the way round the site, and the visitor: the sample sign-in, or the member they
+// signed in as. A member's page keeps only the mark and the visitor, as the design draws it.
+import type { CollectionEntry } from "astro:content";
+import { photoUrl } from "../lib/club";
+
+interface Props {
+	club: CollectionEntry<"club">["data"];
+	member: CollectionEntry<"members"> | undefined;
+	desk: boolean;
+}
+
+const { club, member, desk } = Astro.props;
+const links = [
+	{ href: "/board", label: "The board" },
+	{ href: "/members", label: "Members" },
+	{ href: "/#join", label: "Join" },
+];
+---
+
+<header>
+	<div class:list={[desk ? "wrap-desk h-18.5" : "wrap h-19.5", "flex items-center justify-between gap-4"]}>
+		<a class="flex items-center gap-2.5 font-serif text-mark" href="/"><i class="monogram">{club.monogram}</i>{club.name}</a>
+		<nav aria-label="Main" class="flex items-center gap-6.5 font-medium">
+			{!desk && links.map((link) => <a class="max-md:hidden" href={link.href}>{link.label}</a>)}
+			{
+				member ? (
+					<a class="flex items-center gap-2.5 font-semibold" href={`/members/${member.id}`}>
+						<img class="size-8.5 rounded-pill border-2 border-primary-600 object-cover dark:border-primary-400" src={photoUrl(member.data.photo.id, 120)} width="34" height="34" alt="" />
+						<span class="max-md:sr-only">{member.data.name}</span>
+					</a>
+				) : (
+					<a class="btn-outline" href="/sign-in">Sign in as a sample member</a>
+				)
+			}
+		</nav>
+	</div>
+</header>

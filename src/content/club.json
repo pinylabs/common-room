@@ -1,0 +1,22 @@
+{
+	"club": {
+		"sample": true,
+		"name": "Common Room",
+		"monogram": "CR",
+		"tagline": "a members' club in Northport",
+		"description": "Common Room is a members' club above the old post office: a reading room, a long table, and a board where members say what's on.",
+		"hero": {
+			"title": "A room of your own,",
+			"accent": "with people in it.",
+			"text": "Common Room is a members' club above the old post office: a reading room, a long table, and a board where members say what's on.",
+			"photo": { "id": "photo-1741707596397-efaae09503b5", "alt": "People reading in an old library" },
+			"tryMember": "mina"
+		},
+		"memberCount": 140,
+		"join": {
+			"title": "Membership is",
+			"accent": "£12 a month.",
+			"text": "Come for a free evening first. In this preview, signing in picks one of the sample members, with no password; a real club adds its own sign-in."
+		}
+	}
+}

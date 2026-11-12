@@ -1,0 +1,20 @@
+---
+// Signed in: the session holds a sample member, and the bar says so plainly. Signing out clears the session.
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+	member: CollectionEntry<"members">;
+	desk: boolean;
+}
+
+const { member, desk } = Astro.props;
+---
+
+<div class="bg-secondary-800 text-label text-tertiary-100 dark:bg-secondary-700">
+	<div class:list={[desk ? "wrap-desk" : "wrap", "flex h-10.5 items-center justify-between gap-3 max-md:h-auto max-md:flex-wrap max-md:py-2"]}>
+		<span>Signed in as <b>{member.data.name}</b>, a sample member. No password: this preview's sign-in keeps {member.data.pronoun} in your session.</span>
+		<form method="POST" action="/sign-out">
+			<button type="submit" class="cursor-pointer underline">Sign out</button>
+		</form>
+	</div>
+</div>

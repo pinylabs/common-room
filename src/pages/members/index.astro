@@ -1,0 +1,22 @@
+---
+// Every sample member, as cards linking to their pages.
+import { getEntry } from "astro:content";
+import MemberCard from "../../components/MemberCard.astro";
+import Base from "../../layouts/Base.astro";
+import { members } from "../../lib/club";
+
+const club = (await getEntry("club", "club"))!.data;
+const all = await members();
+---
+
+<Base title="Members" description="The sample members of Common Room.">
+	<main class="wrap pt-7.5 pb-10">
+		<div class="section-head max-md:flex-col max-md:items-start">
+			<h1 class="rise text-title-lg font-bold max-md:text-title">The members</h1>
+			<p class="text-neutral-600 dark:text-neutral-400">The club has {club.memberCount}; this preview has {all.length} sample members.</p>
+		</div>
+		<div class="grid grid-cols-4 gap-5 max-md:grid-cols-2">
+			{all.map((member) => <MemberCard member={member} />)}
+		</div>
+	</main>
+</Base>

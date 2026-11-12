@@ -1,0 +1,40 @@
+---
+// The layout every page shares: the signed-in bar while a sample member is in the session, the header, the page,
+// and the footer. `desk` is a member's page: a narrower column and a header with only the mark and the visitor.
+import { getEntry } from "astro:content";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SessionBar from "../components/SessionBar.astro";
+import { signedIn } from "../lib/club";
+import "../styles/global.css";
+
+interface Props {
+	title?: string;
+	description?: string;
+	desk?: boolean;
+}
+
+const { title, description, desk = false } = Astro.props;
+const club = (await getEntry("club", "club"))!.data;
+const me = await signedIn(Astro.session);
+const fullTitle = title ? `${title} — ${club.name}` : `${club.name} — ${club.tagline}`;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{fullTitle}</title>
+		<meta name="description" content={description ?? club.description} />
+		<link rel="icon" href="/brand/piny-studio-mark.png" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Work+Sans:wght@400..700&display=swap" />
+	</head>
+	<body class="flex min-h-screen flex-col">
+		{me && <SessionBar member={me} desk={desk} />}
+		<SiteHeader club={club} member={me} desk={desk} />
+		<slot />
+		<SiteFooter desk={desk} />
+	</body>
+</html>

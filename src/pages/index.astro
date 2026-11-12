@@ -1,0 +1,72 @@
+---
+// The home: the hero under its arch, the board of pinned posts, some of the members, and membership.
+import { getEntry } from "astro:content";
+import MemberCard from "../components/MemberCard.astro";
+import Note from "../components/Note.astro";
+import Base from "../layouts/Base.astro";
+import { members, photoUrl, posts, signedIn } from "../lib/club";
+
+const club = (await getEntry("club", "club"))!.data;
+const tryMember = (await getEntry(club.hero.tryMember))!;
+const pinned = (await posts((post) => post.data.pinned !== undefined)).sort((a, b) => a.data.pinned! - b.data.pinned!);
+const someMembers = (await members()).slice(0, 4);
+const me = await signedIn(Astro.session);
+---
+
+<Base>
+	<main>
+		<div class="wrap grid grid-cols-hero items-center gap-12 pt-7.5 pb-17.5 max-md:grid-cols-1 max-md:pb-10">
+			<div>
+				<h1 class="rise text-display font-bold max-md:text-display-sm">{club.hero.title} <em class="text-primary-600 not-italic dark:text-primary-400">{club.hero.accent}</em></h1>
+				<p class="rise mt-5.5 mb-7 max-w-lede text-lede text-neutral-600 dark:text-neutral-400" style="--i:1">{club.hero.text}</p>
+				<div class="rise flex flex-wrap gap-3" style="--i:2">
+					{
+						me ? (
+							<a class="btn-brass button" href={`/members/${me.id}`}>Go to your page, {me.data.name}</a>
+						) : (
+							<form method="POST" action="/sign-in" class="contents">
+								<input type="hidden" name="member" value={tryMember.id} />
+								<button type="submit" class="btn-brass button">Try it: sign in as {tryMember.data.name}</button>
+							</form>
+						)
+					}
+					<a class="btn-ghost button" href="#board">Read the board</a>
+				</div>
+			</div>
+			<figure class="rise aspect-5/6 overflow-hidden rounded-t-arch rounded-b-board border-6 border-neutral-50 shadow-frame max-md:-order-1 max-md:rounded-t-arch-sm max-md:rounded-b-post dark:border-neutral-900" style="--i:1">
+				<img class="block size-full object-cover sepia-25 saturate-90" src={photoUrl(club.hero.photo.id, 1400)} width="1400" height="1680" alt={club.hero.photo.alt} />
+			</figure>
+		</div>
+
+		<section id="board" class="pt-20">
+			<div class="wrap">
+				<div class="section-head">
+					<h2>On the board</h2>
+					{me ? <a href={`/members/${me.id}#write`}>Write on the board →</a> : <a href="/sign-in">Sign in to post →</a>}
+				</div>
+				<div class="board">
+					{pinned.map((post, i) => <Note post={post} i={i} />)}
+				</div>
+			</div>
+		</section>
+
+		<section id="members" class="pt-20">
+			<div class="wrap">
+				<div class="section-head">
+					<h2>Some of the members</h2>
+					<a href="/members">All {club.memberCount} →</a>
+				</div>
+				<div class="grid grid-cols-4 gap-5 max-md:grid-cols-2">
+					{someMembers.map((member) => <MemberCard member={member} />)}
+				</div>
+			</div>
+		</section>
+
+		<div id="join" class="mt-22.5 border-t border-neutral-200 dark:border-neutral-800">
+			<div class="wrap grid grid-cols-join items-center gap-10 py-15 max-md:grid-cols-1 max-md:py-10">
+				<h2 class="text-title-lg font-bold max-md:text-title">{club.join.title} <em class="text-primary-600 not-italic dark:text-primary-400">{club.join.accent}</em></h2>
+				<p class="text-intro text-neutral-600 dark:text-neutral-400">{club.join.text}</p>
+			</div>
+		</div>
+	</main>
+</Base>

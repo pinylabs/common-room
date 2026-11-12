@@ -1,0 +1,21 @@
+---
+// The whole board: every post the members pinned, newest first.
+import Note from "../components/Note.astro";
+import Base from "../layouts/Base.astro";
+import { posts, signedIn } from "../lib/club";
+
+const all = await posts();
+const me = await signedIn(Astro.session);
+---
+
+<Base title="The board" description="What's on at Common Room, as the members pinned it.">
+	<main class="wrap pt-7.5 pb-10">
+		<div class="section-head">
+			<h1 class="rise text-title-lg font-bold max-md:text-title">The board</h1>
+			{me ? <a href={`/members/${me.id}#write`}>Write on the board →</a> : <a href="/sign-in">Sign in to post →</a>}
+		</div>
+		<div class="board">
+			{all.map((post, i) => <Note post={post} i={i} />)}
+		</div>
+	</main>
+</Base>

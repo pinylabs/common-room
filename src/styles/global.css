@@ -1,0 +1,151 @@
+/* Common Room's one stylesheet. The tokens are in theme.css; the pages are styled with Tailwind's utilities in their
+   markup. What stays here is what utilities cannot say cleanly: the page column, the pinned notes and their motion,
+   the shared buttons, and the view transitions and scroll-driven reveals every page shares. */
+
+@import "tailwindcss";
+@import "./theme.css";
+
+/* Dark follows the visitor's system, as the design always has: the club at night, the same room by day. */
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+/* The one border the design draws at a pixel and a half: the outlined pills. */
+@utility border-thin {
+  border-width: 1.5px;
+}
+
+@layer base {
+  html {
+    @apply bg-neutral-100 dark:bg-neutral-950;
+  }
+  body {
+    @apply overflow-x-clip bg-neutral-100 font-sans text-tertiary-950 antialiased dark:bg-neutral-950 dark:text-tertiary-200;
+  }
+  h1, h2, h3 {
+    @apply font-serif;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-600 dark:outline-primary-400;
+  }
+}
+
+@layer components {
+  /* The page column: the home's room is wider than a member's desk. */
+  .wrap {
+    @apply mx-auto w-full max-w-room px-9 max-md:px-4.5;
+  }
+  .wrap-desk {
+    @apply mx-auto w-full max-w-desk px-9 max-md:px-4.5;
+  }
+
+  /* The club's mark: the monogram in a brass ring, and the name. */
+  .monogram {
+    @apply grid size-8.5 place-items-center rounded-pill border-2 border-primary-600 text-monogram text-primary-600 not-italic dark:border-primary-400 dark:text-primary-400;
+  }
+
+  /* Buttons: brass filled, an outlined ghost, the outlined brass sign-in, and oxblood "Pin it". */
+  .btn-brass {
+    @apply inline-block cursor-pointer rounded-pill bg-primary-600 px-5.5 py-3.5 font-bold text-neutral-950 dark:bg-primary-400;
+  }
+  .btn-ghost {
+    @apply inline-block rounded-pill border-thin border-neutral-200 px-5.5 py-3.5 font-semibold dark:border-neutral-800;
+  }
+  .btn-outline {
+    @apply inline-block cursor-pointer rounded-pill border-thin border-primary-600 px-4 py-2.25 font-semibold text-primary-600 dark:border-primary-400 dark:text-primary-400;
+  }
+  .btn-oxblood {
+    @apply inline-block cursor-pointer rounded-pill bg-secondary-800 px-4.5 py-2.75 text-button font-bold text-tertiary-100 dark:bg-secondary-700;
+  }
+
+  /* A section's head: its serif title, and a brass link at the far end. */
+  .section-head {
+    @apply mb-5 flex items-end justify-between gap-4;
+    & h2 {
+      @apply text-title-lg font-bold max-md:text-title;
+    }
+    & a {
+      @apply font-semibold text-primary-600 dark:text-primary-400;
+    }
+  }
+
+  /* The cork board, and a note pinned to it. Each note leans by its own `--tilt`, settles on its pin as the page
+     arrives, and straightens and lifts when pointed at. */
+  .board {
+    @apply grid grid-cols-3 items-start gap-6.5 rounded-board bg-tertiary-400 p-8.5 inset-shadow-cork max-md:grid-cols-1 max-md:p-5.5 dark:bg-tertiary-900;
+  }
+  .note {
+    @apply relative rounded-note bg-tertiary-100 px-5 pt-5.5 pb-4.5 text-tertiary-950 shadow-note;
+    rotate: var(--tilt, -1.5deg);
+    transition: rotate 0.5s var(--ease-spring), translate 0.5s var(--ease-spring);
+    animation: pin-on 0.8s var(--ease-pin) both;
+    animation-delay: calc(var(--i, 0) * 120ms + 200ms);
+    &:hover {
+      rotate: 0deg;
+      translate: 0 -6px;
+    }
+  }
+  @keyframes pin-on {
+    from { opacity: 0; translate: 0 -30px; rotate: 8deg; }
+  }
+
+  /* A member's own post on their page; a draft is outlined in dashed brass. */
+  .post {
+    @apply mb-3.5 rounded-post border border-neutral-200 bg-neutral-50 px-5.5 py-5 dark:border-neutral-800 dark:bg-neutral-900;
+  }
+  .post-draft {
+    @apply border-2 border-dashed border-primary-600 dark:border-primary-400;
+  }
+  .flag {
+    @apply text-flag font-bold tracking-label text-primary-600 uppercase dark:text-primary-400;
+  }
+
+  /* The write box: a sheet of paper with its fields. */
+  .field-label {
+    @apply block text-caption font-bold tracking-label text-neutral-600 uppercase;
+  }
+  .field {
+    @apply mt-1.5 w-full rounded-field border border-neutral-300 bg-tertiary-50 p-2.5 font-sans text-button text-tertiary-950;
+  }
+  .field-error {
+    @apply mt-1.5 text-label font-semibold text-secondary-800;
+  }
+}
+
+/* Motion. Only transform, translate, scale, rotate and opacity move, so it stays on the compositor. Under
+   prefers-reduced-motion everything is still, and a browser without scroll timelines simply shows the page. */
+
+/* Page changes: the browser's cross-document view transition. A member's photo names itself the same on the card
+   and on their page, so it grows into its place; the rest fades and slides. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
+@layer components {
+  ::view-transition-old(root) { animation: 260ms cubic-bezier(0.4, 0, 1, 1) both vt-out; }
+  ::view-transition-new(root) { animation: 420ms cubic-bezier(0, 0, 0.2, 1) 80ms both vt-in; }
+  ::view-transition-group(*) { animation-duration: 520ms; animation-timing-function: var(--ease-glide); }
+  @keyframes vt-out { to { opacity: 0; transform: translateY(-12px); } }
+  @keyframes vt-in { from { opacity: 0; transform: translateY(24px); } }
+
+  /* A page's first moment: its words rise one line after another. */
+  .rise { animation: rise 0.9s var(--ease-glide) both; animation-delay: calc(var(--i, 0) * 110ms + 120ms); }
+  @keyframes rise { from { opacity: 0; transform: translateY(36px); } }
+
+  /* Scroll-driven: cards reveal with `translate` and `scale`, so a card's hover `transform` still applies. */
+  @supports (animation-timeline: view()) {
+    .reveal { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+  }
+  @keyframes reveal { from { opacity: 0; translate: 0 70px; scale: 0.97; } }
+
+  /* Hover: a member's card lifts; a button rises a little. */
+  .lift-card { transition: transform 0.45s var(--ease-glide), box-shadow 0.45s; }
+  .lift-card:hover { transform: translateY(-8px); }
+  .button { transition: transform 0.25s var(--ease-glide), background-color 0.25s; }
+  .button:hover { transform: translateY(-2px); }
+
+  /* Still: reduced motion, and the stills a screen capture takes with `html.still`. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+  html.still *, html.still *::before, html.still *::after { animation: none !important; transition: none !important; }
+}

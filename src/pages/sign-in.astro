@@ -1,0 +1,50 @@
+---
+// The preview's sign-in: pick a sample member and the server keeps their id in your session, with no password.
+// A real club adds its own sign-in provider instead.
+import { getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import { members, photoUrl, type Draft } from "../lib/club";
+
+let refused = false;
+if (Astro.request.method === "POST") {
+	const form = await Astro.request.formData();
+	const id = String(form.get("member") ?? "");
+	const member = id ? await getEntry("members", id) : undefined;
+	if (member && Astro.session) {
+		// A new session id on every sign-in; the member, and the draft a sample member left, go into it.
+		await Astro.session.regenerate();
+		Astro.session.set("member", member.id);
+		const sample = member.data.sampleDraft;
+		const drafts: Draft[] = sample ? [{ id: crypto.randomUUID(), ...sample, createdAt: Date.now() }] : [];
+		Astro.session.set("drafts", drafts);
+		return Astro.redirect(`/members/${member.id}`, 303);
+	}
+	refused = true;
+	Astro.response.status = 400;
+}
+
+const all = await members();
+---
+
+<Base title="Sign in as a sample member" description="Sign in to Common Room's preview as one of its sample members.">
+	<main class="wrap pt-7.5 pb-10">
+		<h1 class="rise text-title-lg font-bold max-md:text-title">Sign in as a sample member</h1>
+		<p class="rise mt-3 mb-8 max-w-lede text-intro text-neutral-600 dark:text-neutral-400" style="--i:1">
+			This preview has no passwords. Pick a member and the site keeps them in your session until you sign out; a real club adds its own sign-in.
+		</p>
+		{refused && <p class="field-error mb-6" role="alert">That isn't one of the sample members. Pick one below.</p>}
+		<div class="grid grid-cols-members gap-5">
+			{
+				all.map((member) => (
+					<form method="POST" class="reveal rounded-card border border-neutral-200 bg-neutral-50 p-5.5 text-center dark:border-neutral-800 dark:bg-neutral-900">
+						<img class="mx-auto size-23 rounded-pill border-3 border-primary-600 object-cover dark:border-primary-400" loading="lazy" src={photoUrl(member.data.photo.id, 300)} width="92" height="92" alt="" />
+						<p class="mt-3 font-serif text-title-xs leading-normal">{member.data.name}</p>
+						<p class="mb-4 text-label text-neutral-600 dark:text-neutral-400">{member.data.line}</p>
+						<input type="hidden" name="member" value={member.id} />
+						<button type="submit" class="btn-outline button">Sign in as {member.data.name}</button>
+					</form>
+				))
+			}
+		</div>
+	</main>
+</Base>

@@ -1,0 +1,28 @@
+---
+// The footer every page shares: the sample notice with the photos' credits, and the Pinies who made the site.
+import { getCollection } from "astro:content";
+
+interface Props {
+	desk?: boolean;
+}
+
+const { desk = false } = Astro.props;
+const photos = (await getCollection("photos")).sort((a, b) => a.data.order - b.data.order);
+---
+
+<footer class="mt-auto">
+	<div class:list={[desk ? "wrap-desk" : "wrap", "flex flex-wrap justify-between gap-4 pt-5 pb-12 text-caption text-neutral-600 dark:text-neutral-400"]}>
+		<span>
+			Common Room is a template's sample club; its members and posts are sample content. Photos: {
+				photos.map((photo, i) => (
+					<Fragment>
+						<a class="underline decoration-neutral-200 underline-offset-2 dark:decoration-neutral-800" href={photo.data.page}>{photo.data.photographer}</a>{i < photos.length - 1 ? ", " : ""}
+					</Fragment>
+				))
+			} on Unsplash.
+		</span>
+		<span class="whitespace-nowrap">
+			A Piny template preview. Made by the Pinies in <a class="font-medium text-tertiary-950 dark:text-tertiary-200" href="https://piny.studio/home/"><img class="me-1 inline-block size-5 align-middle" src="/brand/piny-studio-mark.png" width="20" height="20" alt="" />Piny Studio</a>
+		</span>
+	</div>
+</footer>
