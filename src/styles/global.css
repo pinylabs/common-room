@@ -44,7 +44,7 @@
 
   /* Buttons: brass filled, an outlined ghost, the outlined brass sign-in, and oxblood "Pin it". */
   .btn-brass {
-    @apply inline-block cursor-pointer rounded-pill bg-primary-600 px-5.5 py-3.5 font-bold text-neutral-950 dark:bg-primary-400;
+    @apply inline-block cursor-pointer rounded-pill bg-primary-500 px-5.5 py-3.5 font-bold text-neutral-950 dark:bg-primary-400;
   }
   .btn-ghost {
     @apply inline-block rounded-pill border-thin border-neutral-200 px-5.5 py-3.5 font-semibold dark:border-neutral-800;
